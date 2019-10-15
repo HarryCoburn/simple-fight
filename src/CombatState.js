@@ -1,17 +1,36 @@
-import { Player } from './Player';
+import { View } from './View';
 import { Enemy } from './Enemy';
+import { game } from './GameState';
 
 export class CombatState {
-  constructor(player, enemy) {
-    if (player instanceof Player === false || enemy instanceof Enemy === false) {
-      throw 'Did not start combat with a player and an enemy';
+  constructor(enemy) {
+    if (enemy instanceof Enemy === false) {
+      throw 'Did not start combat with an enemy';
     }
-    this.player = player;
+    this.player = game.player;
     this.enemy = enemy;
     this.playerWon = null;
     this.combatStarted = false;
     this.currentTurn = null;
   }
+
+  render() {
+    View.textBox.style.backgroundColor = 'red';
+    View.textBox.insertAdjacentHTML(
+      'beforeend',
+      `<p>
+    Enemy name: ${this.enemy.name}<br>
+    Enemy HP: ${this.enemy.hp}<br>
+    </p>`
+    );
+  }
+
+  onEnter() {
+    this.render();
+    this.startRound();
+  }
+
+  onExit() {}
 
   startRound() {
     this.currentTurn = this.player;
@@ -19,6 +38,7 @@ export class CombatState {
   }
 
   playerRound() {
+    console.log('Player starts round');
     this.player.attack(this.enemy);
     if (this.enemy.hp <= 0) {
       this.playerWon = true;
@@ -35,6 +55,7 @@ export class CombatState {
       this.playerWon = false;
       this.resolveCombat();
     } else {
+      console.log('Enemy finished their round');
       return;
     }
   }
